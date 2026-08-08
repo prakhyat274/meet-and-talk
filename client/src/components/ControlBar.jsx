@@ -8,6 +8,20 @@ import {
     ScreenShareOffIcon,
 } from "./icons";
 
+// ---- comfy palette tokens (matches Room.jsx / Home.jsx) ----
+const palette = {
+    violet: "#B1B2FF",
+    blue: "#AAC4FF",
+    lilac: "#D2DAFF",
+    mist: "#EEF1FF",
+    ink: "#3E3D63",
+    inkSoft: "#6B6A93",
+    coral: "#F79088",
+    coralDeep: "#F0645A",
+    card: "#FFFFFF",
+};
+const shadowPop = "0 14px 32px rgba(120, 120, 200, 0.26)";
+
 export default function ControlBar({
     isMicOn,
     onToggleMic,
@@ -16,14 +30,15 @@ export default function ControlBar({
     onLeaveCall,
 }) {
     const btnBase = {
-        width: "42px",
-        height: "42px",
-        borderRadius: "10px",
+        width: "48px",
+        height: "48px",
+        borderRadius: "16px",
         border: "none",
         cursor: "pointer",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
+        transition: "transform .15s ease, box-shadow .15s ease, background .2s ease",
     };
 
     return (
@@ -34,19 +49,22 @@ export default function ControlBar({
                 left: "50%",
                 transform: "translateX(-50%)",
                 display: "flex",
+                alignItems: "center",
                 gap: "10px",
-                background: "#131315",
-                border: "1px solid #232326",
-                borderRadius: "14px",
-                padding: "8px",
+                background: palette.card,
+                border: "none",
+                borderRadius: "24px",
+                padding: "10px",
+                boxShadow: shadowPop,
+                zIndex: 3,
             }}>
             <button
                 className="control-btn"
                 onClick={onToggleMic}
                 style={{
                     ...btnBase,
-                    background: isMicOn ? "transparent" : "#e5484d",
-                    color: isMicOn ? "#d4d4d8" : "#fff",
+                    background: isMicOn ? palette.mist : palette.coral,
+                    color: isMicOn ? palette.ink : "#fff",
                 }}
                 title={isMicOn ? "Mute mic" : "Unmute mic"}>
                 {isMicOn ? <MicIcon /> : <MicOffIcon />}
@@ -57,8 +75,8 @@ export default function ControlBar({
                 onClick={onToggleCamera}
                 style={{
                     ...btnBase,
-                    background: isCameraOn ? "transparent" : "#e5484d",
-                    color: isCameraOn ? "#d4d4d8" : "#fff",
+                    background: isCameraOn ? palette.mist : palette.coral,
+                    color: isCameraOn ? palette.ink : "#fff",
                 }}
                 title={isCameraOn ? "Turn off camera" : "Turn on camera"}>
                 {isCameraOn ? <CameraIcon /> : <CameraOffIcon />}
@@ -69,9 +87,11 @@ export default function ControlBar({
             {/* Separator */}
             <div
                 style={{
-                    width: "1px",
-                    background: "#2a2a2e",
-                    margin: "4px 2px",
+                    width: "2px",
+                    height: "30px",
+                    background: palette.lilac,
+                    borderRadius: "2px",
+                    margin: "0 2px",
                 }}
             />
 
@@ -80,10 +100,10 @@ export default function ControlBar({
                 onClick={onLeaveCall}
                 style={{
                     ...btnBase,
-                    width: "56px",
-                    background: "#e5484d",
+                    width: "62px",
+                    background: palette.coralDeep,
                     color: "#fff",
-                    borderRadius: "10px",
+                    borderRadius: "16px",
                 }}
                 title="Leave call">
                 <LeaveCallIcon />
@@ -91,4 +111,3 @@ export default function ControlBar({
         </div>
     );
 }
-

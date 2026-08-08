@@ -1,5 +1,17 @@
 import { ChatIcon } from "./icons";
 
+const palette = {
+    violet: "#B1B2FF",
+    lilac: "#D2DAFF",
+    ink: "#3E3D63",
+    inkSoft: "#6B6A93",
+    card: "#FFFFFF",
+    mintDeep: "#7FD9AE",
+};
+const fontDisplay = "'Fredoka', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+const fontBody = "'Quicksand', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+const shadowSoft = "0 10px 26px rgba(120, 120, 200, 0.18)";
+
 export default function RoomHeader({ roomCode, participantCount, isChatOpen, onToggleChat }) {
     return (
         <div
@@ -10,25 +22,31 @@ export default function RoomHeader({ roomCode, participantCount, isChatOpen, onT
                 marginBottom: "20px",
                 flexShrink: 0,
             }}>
-            <div>
-                <h3
+            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                <span
                     style={{
-                        color: "#f2f2f3",
-                        fontWeight: 500,
-                        fontSize: "15px",
-                        margin: 0,
-                        letterSpacing: "0.2px",
-                    }}>
-                    {roomCode}
-                </h3>
-                <p
-                    style={{
-                        color: "#6b6b72",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "6px",
+                        background: palette.card,
+                        color: palette.inkSoft,
+                        fontFamily: fontBody,
+                        fontWeight: 700,
                         fontSize: "12.5px",
-                        margin: "2px 0 0",
+                        padding: "8px 14px",
+                        borderRadius: "100px",
+                        boxShadow: shadowSoft,
                     }}>
+                    <span
+                        style={{
+                            width: "7px",
+                            height: "7px",
+                            borderRadius: "50%",
+                            background: palette.mintDeep,
+                        }}
+                    />
                     {participantCount} in call
-                </p>
+                </span>
             </div>
             <button
                 onClick={onToggleChat}
@@ -36,15 +54,17 @@ export default function RoomHeader({ roomCode, participantCount, isChatOpen, onT
                     display: "flex",
                     alignItems: "center",
                     gap: "7px",
-                    padding: "8px 14px",
-                    borderRadius: "8px",
-                    border: "1px solid",
-                    borderColor: isChatOpen ? "#3a3a40" : "#1f1f22",
-                    background: isChatOpen ? "#1a1a1d" : "transparent",
-                    color: "#d4d4d8",
+                    padding: "9px 16px",
+                    borderRadius: "14px",
+                    border: "none",
+                    background: isChatOpen ? palette.ink : palette.violet,
+                    color: "#fff",
+                    fontFamily: fontBody,
                     fontSize: "13px",
-                    fontWeight: 500,
+                    fontWeight: 700,
                     cursor: "pointer",
+                    boxShadow: shadowSoft,
+                    transition: "transform .15s ease, background .2s ease",
                 }}>
                 <ChatIcon />
                 Chat

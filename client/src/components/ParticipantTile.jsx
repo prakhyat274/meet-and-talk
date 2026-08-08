@@ -1,9 +1,22 @@
 import { useRef, useEffect, useState } from "react";
 import { MicOffIcon } from "./icons";
 
-export default function ParticipantTile({ username, stream, isLocal, isMicOn }) {
+const palette = {
+    violet: "#B1B2FF",
+    blue: "#AAC4FF",
+    lilac: "#D2DAFF",
+    ink: "#3E3D63",
+    coral: "#F79088",
+};
+const fontDisplay = "'Fredoka', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+const fontBody = "'Quicksand', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+const shadowSoft = "0 10px 26px rgba(120, 120, 200, 0.18)";
+
+export default function ParticipantTile({ username, stream, isLocal, isMicOn, isCameraOn }) {
     const videoRef = useRef(null);
     const [hasVideo, setHasVideo] = useState(false);
+
+    const showVideo = hasVideo && isCameraOn !== false;
 
     const initials = username
         .split(" ")
@@ -26,11 +39,9 @@ export default function ParticipantTile({ username, stream, isLocal, isMicOn }) 
 
         checkVideo();
 
-        // Listen for track changes
         stream.addEventListener("addtrack", checkVideo);
         stream.addEventListener("removetrack", checkVideo);
 
-        // Poll track enabled state (tracks can be enabled/disabled without events)
         const interval = setInterval(checkVideo, 500);
 
         return () => {
@@ -45,16 +56,17 @@ export default function ParticipantTile({ username, stream, isLocal, isMicOn }) 
             className="participant-tile"
             style={{
                 position: "relative",
-                background: "#131315",
-                borderRadius: "10px",
+                background: `linear-gradient(160deg, ${palette.lilac}, ${palette.blue})`,
+                borderRadius: "24px",
                 minHeight: 0,
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                border: "1px solid #1f1f22",
+                border: isLocal ? `3px solid ${palette.violet}` : "none",
+                boxShadow: shadowSoft,
                 overflow: "hidden",
             }}>
-            {/* Video element — always rendered but hidden when no video */}
+
             <video
                 ref={videoRef}
                 autoPlay
@@ -64,32 +76,32 @@ export default function ParticipantTile({ username, stream, isLocal, isMicOn }) 
                     width: "100%",
                     height: "100%",
                     objectFit: "cover",
-                    display: hasVideo ? "block" : "none",
+                    display: showVideo ? "block" : "none",
                     transform: isLocal ? "scaleX(-1)" : "none",
                 }}
             />
 
-            {/* Initials fallback when camera is off */}
-            {!hasVideo && (
+            {!showVideo && (
                 <div
                     style={{
-                        width: "60px",
-                        height: "60px",
+                        width: "64px",
+                        height: "64px",
                         borderRadius: "50%",
-                        background: "#232326",
+                        background: palette.violet,
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",
-                        fontSize: "18px",
-                        fontWeight: 500,
-                        color: "#c9c9cd",
+                        fontFamily: fontDisplay,
+                        fontSize: "20px",
+                        fontWeight: 600,
+                        color: "#fff",
                         flexShrink: 0,
+                        boxShadow: shadowSoft,
                     }}>
                     {initials}
                 </div>
             )}
 
-            {/* Username label */}
             <div
                 style={{
                     position: "absolute",
@@ -98,19 +110,20 @@ export default function ParticipantTile({ username, stream, isLocal, isMicOn }) 
                     display: "flex",
                     alignItems: "center",
                     gap: "6px",
-                    background: "rgba(10,10,11,0.7)",
-                    padding: "3px 9px",
-                    borderRadius: "6px",
+                    background: "rgba(62,61,99,0.55)",
+                    padding: "5px 10px",
+                    borderRadius: "100px",
+                    fontFamily: fontBody,
                     fontSize: "12px",
-                    fontWeight: 500,
-                    color: "#e4e4e7",
+                    fontWeight: 700,
+                    color: "#fff",
                     whiteSpace: "nowrap",
                     overflow: "hidden",
                     textOverflow: "ellipsis",
                     maxWidth: "calc(100% - 20px)",
                 }}>
                 {isMicOn === false && (
-                    <span style={{ display: "flex", color: "#e5484d" }}>
+                    <span style={{ display: "flex", color: palette.coral }}>
                         <MicOffIcon />
                     </span>
                 )}
@@ -120,4 +133,3 @@ export default function ParticipantTile({ username, stream, isLocal, isMicOn }) 
         </div>
     );
 }
-

@@ -1,3 +1,12 @@
+// ---- comfy palette tokens (matches Room.jsx / Home.jsx) ----
+const palette = {
+    ink: "#3E3D63",
+    card: "#FFFFFF",
+    mintDeep: "#7FD9AE",
+};
+const fontBody = "'Quicksand', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+const shadowPop = "0 14px 32px rgba(120, 120, 200, 0.26)";
+
 export default function Notification({ id, text }) {
     return (
         <div
@@ -9,22 +18,24 @@ export default function Notification({ id, text }) {
                 display: "flex",
                 alignItems: "center",
                 gap: "10px",
-                padding: "11px 15px",
-                borderRadius: "10px",
-                background: "#131315",
-                border: "1px solid #232326",
-                color: "#e4e4e7",
+                padding: "12px 16px",
+                borderRadius: "16px",
+                background: palette.card,
+                border: "none",
+                boxShadow: shadowPop,
+                color: palette.ink,
+                fontFamily: fontBody,
                 fontSize: "13px",
-                fontWeight: 500,
+                fontWeight: 700,
                 maxWidth: "280px",
                 zIndex: 50,
             }}>
             <div
                 style={{
-                    width: "7px",
-                    height: "7px",
+                    width: "8px",
+                    height: "8px",
                     borderRadius: "50%",
-                    background: "#4f46e5",
+                    background: palette.mintDeep,
                     flexShrink: 0,
                 }}
             />

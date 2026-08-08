@@ -11,12 +11,12 @@ export default function ParticipantsGrid({
             style={{
                 flex: 1,
                 display: "grid",
-                gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
+                gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
                 gridAutoRows: "1fr",
-                gap: "10px",
+                gap: "16px",
                 minHeight: 0,
                 overflow: "hidden",
-                paddingBottom: "64px",
+                paddingBottom: "96px",
             }}>
             {participants.map((p) => {
                 const isLocal = p.socketId === currentSocketId;
@@ -29,10 +29,10 @@ export default function ParticipantsGrid({
                         stream={stream}
                         isLocal={isLocal}
                         isMicOn={p.isMicOn}
+                        isCameraOn={p.isCameraOn}
                     />
                 );
             })}
         </div>
     );
 }
-

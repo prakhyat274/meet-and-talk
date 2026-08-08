@@ -3,6 +3,21 @@ import socket from "../socket";
 import TextBubble from "./TextBubble";
 import { SendIcon } from "./icons";
 
+// ---- comfy palette tokens (matches Room.jsx / Home.jsx) ----
+const palette = {
+    violet: "#B1B2FF",
+    blue: "#AAC4FF",
+    lilac: "#D2DAFF",
+    mist: "#EEF1FF",
+    ink: "#3E3D63",
+    inkSoft: "#6B6A93",
+    coral: "#F79088",
+    card: "#FFFFFF",
+};
+const fontDisplay = "'Fredoka', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+const fontBody = "'Quicksand', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+const shadowSoft = "0 10px 26px rgba(120, 120, 200, 0.18)";
+
 export default function ChatPanel({ chat, onSendMessage }) {
     const [message, setMessage] = useState("");
 
@@ -16,19 +31,25 @@ export default function ChatPanel({ chat, onSendMessage }) {
             className="chat-panel"
             style={{
                 width: "300px",
-                borderLeft: "1px solid #1f1f22",
-                background: "#0d0d0f",
+                borderLeft: `none`,
+                background: palette.card,
+                borderRadius: "28px 0 0 28px",
+                boxShadow: "-8px 0 24px rgba(120, 120, 200, 0.15)",
                 display: "flex",
                 flexDirection: "column",
                 padding: "22px 20px",
                 minHeight: 0,
                 overflow: "hidden",
+                fontFamily: fontBody,
+                position: "relative",
+                zIndex: 2,
             }}>
             <h3
                 style={{
-                    color: "#e4e4e7",
-                    fontWeight: 500,
-                    fontSize: "14px",
+                    color: palette.ink,
+                    fontFamily: fontDisplay,
+                    fontWeight: 600,
+                    fontSize: "16px",
                     margin: "0 0 14px",
                     flexShrink: 0,
                     letterSpacing: "0.2px",
@@ -37,8 +58,9 @@ export default function ChatPanel({ chat, onSendMessage }) {
             </h3>
             <div
                 style={{
-                    height: "1px",
-                    background: "#1f1f22",
+                    height: "2px",
+                    background: palette.lilac,
+                    borderRadius: "2px",
                     marginBottom: "16px",
                     flexShrink: 0,
                 }}
@@ -51,7 +73,7 @@ export default function ChatPanel({ chat, onSendMessage }) {
                     overflow: "hidden",
                     display: "flex",
                     flexDirection: "column-reverse",
-                    gap: "4px",
+                    gap: "8px",
                     marginBottom: "14px",
                 }}>
                 {[...chat].reverse().map((data, index) => (
@@ -66,35 +88,40 @@ export default function ChatPanel({ chat, onSendMessage }) {
                     type="text"
                     value={message}
                     onChange={(e) => setMessage(e.target.value)}
-                    placeholder="Message"
+                    placeholder="Say something nice…"
                     onKeyDown={(e) => e.key === "Enter" && handleSend()}
                     style={{
                         flex: 1,
                         minWidth: 0,
-                        padding: "10px 13px",
-                        borderRadius: "8px",
-                        border: "1px solid #232326",
-                        background: "#131315",
-                        color: "#e4e4e7",
+                        padding: "10px 15px",
+                        borderRadius: "16px",
+                        border: `2px solid ${palette.lilac}`,
+                        background: palette.mist,
+                        color: palette.ink,
+                        fontFamily: fontBody,
+                        fontWeight: 600,
                         fontSize: "13px",
                         outline: "none",
                         boxSizing: "border-box",
+                        transition: "border-color .15s ease",
                     }}
                 />
                 <button
                     onClick={handleSend}
                     style={{
-                        width: "38px",
-                        height: "38px",
+                        width: "40px",
+                        height: "40px",
                         flexShrink: 0,
-                        borderRadius: "8px",
-                        border: "1px solid #232326",
-                        background: "#1a1a1d",
-                        color: "#d4d4d8",
+                        borderRadius: "14px",
+                        border: "none",
+                        background: palette.violet,
+                        color: "#fff",
                         cursor: "pointer",
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",
+                        boxShadow: shadowSoft,
+                        transition: "transform .15s ease",
                     }}>
                     <SendIcon />
                 </button>

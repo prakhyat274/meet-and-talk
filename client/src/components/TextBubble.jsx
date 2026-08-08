@@ -1,3 +1,12 @@
+// ---- comfy palette tokens (matches Room.jsx / Home.jsx) ----
+const palette = {
+    violet: "#B1B2FF",
+    mist: "#EEF1FF",
+    ink: "#3E3D63",
+    inkSoft: "#6B6A93",
+};
+const fontBody = "'Quicksand', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+
 export default function TextBubble({ data, id, index }) {
     const isMine = data.socketID === id;
 
@@ -9,11 +18,13 @@ export default function TextBubble({ data, id, index }) {
                 flexDirection: "column",
                 alignSelf: isMine ? "flex-end" : "flex-start",
                 maxWidth: "80%",
+                fontFamily: fontBody,
             }}>
             <span
                 style={{
                     fontSize: "10px",
-                    color: "#6b6b72",
+                    fontWeight: 600,
+                    color: palette.inkSoft,
                     textAlign: "right",
                     paddingRight: "2px",
                 }}>
@@ -23,18 +34,18 @@ export default function TextBubble({ data, id, index }) {
             <div
                 style={{
                     position: "relative",
-                    padding: "8px 10px",
-                    borderRadius: "8px",
-                    background: isMine ? "#4f46e5" : "#18181b",
-                    border: isMine ? "none" : "1px solid #232326",
-                    color: "#e4e4e7",
+                    padding: "9px 13px",
+                    borderRadius: isMine ? "16px 16px 6px 16px" : "16px 16px 16px 6px",
+                    background: isMine ? palette.violet : palette.mist,
+                    border: "none",
+                    color: isMine ? "#fff" : palette.ink,
                 }}>
                 {!isMine && (
                     <div
                         style={{
-                            fontSize: "12px",
-                            fontWeight: 500,
-                            color: "#8a8a92",
+                            fontSize: "11px",
+                            fontWeight: 700,
+                            color: palette.inkSoft,
                             marginBottom: "2px",
                         }}>
                         {data.sender}
@@ -47,6 +58,7 @@ export default function TextBubble({ data, id, index }) {
                         lineHeight: 1.4,
                         wordBreak: "break-word",
                         display: "block",
+                        fontWeight: 600,
                     }}>
                     {data.message}
                 </span>

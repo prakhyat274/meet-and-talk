@@ -3,6 +3,54 @@ import { useNavigate } from "react-router-dom";
 
 import "../App.css";
 
+// ---- comfy palette tokens (matches Room.jsx) ----
+const palette = {
+    violet: "#B1B2FF",
+    blue: "#AAC4FF",
+    lilac: "#D2DAFF",
+    mist: "#EEF1FF",
+    ink: "#3E3D63",
+    inkSoft: "#6B6A93",
+    coral: "#F79088",
+    card: "#FFFFFF",
+};
+const fontDisplay = "'Fredoka', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+const fontBody = "'Quicksand', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+const shadowSoft = "0 10px 26px rgba(120, 120, 200, 0.18)";
+const shadowPop = "0 14px 32px rgba(120, 120, 200, 0.26)";
+
+// small floating background blobs, purely decorative
+function ComfyBackdrop() {
+    const blobs = [
+        { size: 300, top: -90, left: -70, bg: palette.lilac, opacity: 0.55 },
+        { size: 220, bottom: -70, right: "5%", bg: palette.blue, opacity: 0.5 },
+        { size: 160, top: "35%", right: -70, bg: palette.violet, opacity: 0.22 },
+        { size: 130, bottom: "8%", left: "6%", bg: palette.coral, opacity: 0.16 },
+    ];
+    return (
+        <div style={{ position: "absolute", inset: 0, overflow: "hidden", pointerEvents: "none", zIndex: 0 }}>
+            {blobs.map((b, i) => (
+                <div
+                    key={i}
+                    style={{
+                        position: "absolute",
+                        width: b.size,
+                        height: b.size,
+                        borderRadius: "50%",
+                        background: b.bg,
+                        opacity: b.opacity,
+                        filter: "blur(2px)",
+                        top: b.top,
+                        left: b.left,
+                        right: b.right,
+                        bottom: b.bottom,
+                    }}
+                />
+            ))}
+        </div>
+    );
+}
+
 function Home() {
     const [roomCode, setRoomCode] = useState("");
     const [username, setUsername] = useState(localStorage.getItem("username") ?? "");
@@ -59,6 +107,21 @@ function Home() {
         }
     };
 
+    const inputStyle = (hasError) => ({
+        width: "100%",
+        padding: "12px 14px",
+        borderRadius: "14px",
+        border: hasError ? `2px solid ${palette.coral}` : `2px solid ${palette.lilac}`,
+        background: palette.mist,
+        color: palette.ink,
+        fontFamily: fontBody,
+        fontWeight: 600,
+        fontSize: "14px",
+        outline: "none",
+        boxSizing: "border-box",
+        transition: "border-color .15s ease",
+    });
+
     return (
         <div
             style={{
@@ -66,30 +129,52 @@ function Home() {
                 alignItems: "center",
                 justifyContent: "center",
                 minHeight: "100vh",
-                background: "#0d0d0f",
+                background: palette.mist,
                 padding: "20px",
+                position: "relative",
+                overflow: "hidden",
+                fontFamily: fontBody,
             }}>
+            <ComfyBackdrop />
+
             <div
                 style={{
+                    position: "relative",
+                    zIndex: 1,
                     width: "100%",
                     maxWidth: "380px",
-                    background: "#1c1c1f",
-                    border: "1px solid #2a2a2e",
-                    borderRadius: "16px",
-                    padding: "32px 28px",
+                    background: palette.card,
+                    borderRadius: "28px",
+                    padding: "36px 30px 32px",
+                    boxShadow: shadowPop,
                 }}>
+                <span style={{
+                    display: "inline-block",
+                    background: palette.lilac,
+                    color: palette.ink,
+                    fontSize: "12px",
+                    fontWeight: 700,
+                    padding: "6px 14px",
+                    borderRadius: "100px",
+                    marginBottom: "14px",
+                    letterSpacing: "0.4px",
+                }}>
+                    🌙 nook
+                </span>
+
                 <h2
                     style={{
-                        color: "#f4f4f5",
+                        color: palette.ink,
+                        fontFamily: fontDisplay,
                         fontWeight: 600,
-                        fontSize: "22px",
+                        fontSize: "24px",
                         margin: "0 0 4px",
                     }}>
                     Video Meet
                 </h2>
                 <p
                     style={{
-                        color: "#8a8a92",
+                        color: palette.inkSoft,
                         fontSize: "14px",
                         margin: "0 0 24px",
                     }}>
@@ -106,23 +191,14 @@ function Home() {
                         }
                     }}
                     placeholder="Enter username"
-                    style={{
-                        width: "100%",
-                        padding: "12px 14px",
-                        borderRadius: "10px",
-                        border: isUsernameEmpty ? "1px solid #f87171" : "1px solid #2a2a2e",
-                        background: "#111114",
-                        color: "#e4e4e7",
-                        fontSize: "14px",
-                        outline: "none",
-                        boxSizing: "border-box",
-                    }}
+                    style={inputStyle(isUsernameEmpty)}
                 />
                 <p
                     style={{
                         display: !isUsernameEmpty ? "none" : "block",
-                        color: "#f87171",
+                        color: "#c8564d",
                         fontSize: "12.5px",
+                        fontWeight: 600,
                         margin: "6px 0 0",
                     }}>
                     Username required
@@ -133,15 +209,18 @@ function Home() {
                     style={{
                         width: "100%",
                         marginTop: "18px",
-                        padding: "12px 14px",
-                        borderRadius: "10px",
+                        padding: "13px 14px",
+                        borderRadius: "16px",
                         border: "none",
-                        background: "#6366f1",
+                        background: `linear-gradient(135deg, ${palette.violet}, ${palette.blue})`,
                         color: "#fff",
-                        fontWeight: 600,
+                        fontFamily: fontBody,
+                        fontWeight: 700,
                         fontSize: "14px",
                         cursor: "pointer",
                         boxSizing: "border-box",
+                        boxShadow: shadowSoft,
+                        transition: "transform .15s ease, box-shadow .15s ease",
                     }}>
                     Start meet
                 </button>
@@ -153,9 +232,9 @@ function Home() {
                         gap: "12px",
                         margin: "24px 0",
                     }}>
-                    <div style={{ flex: 1, height: "1px", background: "#2a2a2e" }} />
-                    <span style={{ color: "#5a5a60", fontSize: "12px" }}>or</span>
-                    <div style={{ flex: 1, height: "1px", background: "#2a2a2e" }} />
+                    <div style={{ flex: 1, height: "2px", background: palette.lilac, borderRadius: "2px" }} />
+                    <span style={{ color: palette.inkSoft, fontSize: "12px", fontWeight: 700 }}>or</span>
+                    <div style={{ flex: 1, height: "2px", background: palette.lilac, borderRadius: "2px" }} />
                 </div>
 
                 <div style={{ display: "flex", gap: "8px" }}>
@@ -169,32 +248,26 @@ function Home() {
                         placeholder="Enter room code"
                         onKeyDown={(e) => e.key === "Enter" && handleJoinMeet(roomCode)}
                         style={{
+                            ...inputStyle(!!roomCodeError),
                             flex: 1,
                             minWidth: 0,
-                            padding: "12px 14px",
-                            borderRadius: "10px",
-                            border: roomCodeError
-                                ? "1px solid #f87171"
-                                : "1px solid #2a2a2e",
-                            background: "#111114",
-                            color: "#e4e4e7",
-                            fontSize: "14px",
-                            outline: "none",
-                            boxSizing: "border-box",
                         }}
                     />
                     <button
                         onClick={() => handleJoinMeet(roomCode)}
                         style={{
-                            padding: "12px 18px",
-                            borderRadius: "10px",
-                            border: "1px solid #2a2a2e",
-                            background: "#111114",
-                            color: "#f4f4f5",
-                            fontWeight: 600,
+                            padding: "12px 20px",
+                            borderRadius: "14px",
+                            border: `2px solid ${palette.lilac}`,
+                            background: palette.card,
+                            color: palette.ink,
+                            fontFamily: fontBody,
+                            fontWeight: 700,
                             fontSize: "14px",
                             cursor: "pointer",
                             flexShrink: 0,
+                            boxShadow: shadowSoft,
+                            transition: "transform .15s ease",
                         }}>
                         Join
                     </button>
@@ -203,8 +276,9 @@ function Home() {
                 {roomCodeError && (
                     <p
                         style={{
-                            color: "#f87171",
+                            color: "#c8564d",
                             fontSize: "12.5px",
+                            fontWeight: 600,
                             margin: "8px 0 0",
                         }}>
                         {roomCodeError}
@@ -216,4 +290,3 @@ function Home() {
 }
 
 export default Home;
-
