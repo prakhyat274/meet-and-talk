@@ -13,8 +13,6 @@ export default function ControlBar({
     onToggleMic,
     isCameraOn,
     onToggleCamera,
-    isScreenSharing,
-    onToggleScreenShare,
     onLeaveCall,
 }) {
     const btnBase = {
@@ -66,18 +64,7 @@ export default function ControlBar({
                 {isCameraOn ? <CameraIcon /> : <CameraOffIcon />}
             </button>
 
-            <button
-                className="control-btn"
-                onClick={onToggleScreenShare}
-                style={{
-                    ...btnBase,
-                    background: isScreenSharing ? "rgba(52, 211, 153, 0.15)" : "transparent",
-                    color: isScreenSharing ? "#34d399" : "#d4d4d8",
-                    border: isScreenSharing ? "1px solid rgba(52, 211, 153, 0.3)" : "none",
-                }}
-                title={isScreenSharing ? "Stop sharing" : "Share screen"}>
-                {isScreenSharing ? <ScreenShareOffIcon /> : <ScreenShareIcon />}
-            </button>
+
 
             {/* Separator */}
             <div

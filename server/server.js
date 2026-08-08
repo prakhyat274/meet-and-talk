@@ -88,6 +88,8 @@ io.on("connection", (socket) => {
     socket.on("join-room", (data) => {
         socket.data.roomCode = data.roomCode;
         socket.data.username = data.username;
+        socket.data.isMicOn = data.isMicOn ?? false;
+        socket.data.isCameraOn = data.isCameraOn ?? false;
 
         const existingUsers =
             roomsToUser.get(socket.data.roomCode) ?? [];
@@ -103,8 +105,8 @@ io.on("connection", (socket) => {
         existingUsers.push({
             socketId: socket.id,
             username: socket.data.username,
-            isMicOn: false,
-            isCameraOn: false,
+            isMicOn: socket.data.isMicOn,
+            isCameraOn: socket.data.isCameraOn,
         });
 
         roomsToUser.set(
