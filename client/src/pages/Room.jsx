@@ -146,7 +146,7 @@ export default function Room() {
                         🌙 room: {roomCode}
                     </span>
 
-                    <h1 style={{ fontFamily: fontDisplay, fontWeight: 600, fontSize: "28px", margin: "0 0 6px" }}>
+                    <h1 style={{ fontFamily: fontDisplay, fontWeight: 700, fontSize: "28px", color: palette.ink, margin: "0 0 6px" }}>
                         Ready to join?
                     </h1>
                     <p style={{ color: palette.inkSoft, fontSize: "14px", margin: "0 0 20px" }}>
