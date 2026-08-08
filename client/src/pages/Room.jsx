@@ -13,18 +13,19 @@ export default function Room() {
     const { roomCode } = useParams();
     const username = localStorage.getItem("username") ?? "Anonymous";
 
-    const { chat, notifications, participantsList, sendMessage } =
-        useRoomSocket(roomCode, username);
-
     const {
         localStream,
         remoteStreams,
         isMicOn,
         isCameraOn,
         mediaError,
+        isMediaReady,
         toggleMic,
         toggleCamera,
     } = useWebRTC(roomCode);
+
+    const { chat, notifications, participantsList, sendMessage } =
+        useRoomSocket(roomCode, username, isMediaReady);
 
     const [isChatOpen, setIsChatOpen] = useState(false);
 

@@ -1,12 +1,14 @@
 import { useEffect, useState } from "react";
 import socket from "../socket";
 
-export default function useRoomSocket(roomCode, username) {
+export default function useRoomSocket(roomCode, username, shouldJoin = true) {
     const [chat, setChat] = useState([]);
     const [notifications, setNotifications] = useState([]);
     const [participantsList, setParticipantsList] = useState([]);
 
     useEffect(() => {
+        if (!shouldJoin) return;
+
         const handleReceiveMessage = (data) => {
             setChat((prev) => [...prev, data]);
         };
@@ -18,7 +20,7 @@ export default function useRoomSocket(roomCode, username) {
             socket.off("receive-message", handleReceiveMessage);
             socket.emit("leave-room");
         };
-    }, [roomCode, username]);
+    }, [roomCode, username, shouldJoin]);
 
     useEffect(() => {
         const handleRoomNotification = (data) => {

@@ -14,6 +14,7 @@ export default function useWebRTC(roomCode) {
     const [isMicOn, setIsMicOn] = useState(true);
     const [isCameraOn, setIsCameraOn] = useState(true);
     const [mediaError, setMediaError] = useState(null);
+    const [isMediaReady, setIsMediaReady] = useState(false);
 
     const peerConnections = useRef(new Map());
     const localStreamRef = useRef(null);
@@ -54,6 +55,10 @@ export default function useWebRTC(roomCode) {
                     setIsCameraOn(false);
                 } catch (audioErr) {
                     console.error("Failed to access audio:", audioErr);
+                }
+            } finally {
+                if (!cancelled) {
+                    setIsMediaReady(true);
                 }
             }
         }
@@ -129,7 +134,7 @@ export default function useWebRTC(roomCode) {
     // ── Signaling event handlers ─────────────────────────────────
 
     useEffect(() => {
-        if (!localStreamRef.current) return;
+        if (!isMediaReady) return;
 
         // When a new user joins, existing peers create an offer
         const handleUserJoined = async ({ socketId: remoteSocketId }) => {
@@ -221,7 +226,7 @@ export default function useWebRTC(roomCode) {
             socket.off("ice-candidate", handleIceCandidate);
             socket.off("user-left", handleUserLeft);
         };
-    }, [localStream, createPeerConnection, flushCandidates]);
+    }, [isMediaReady, createPeerConnection, flushCandidates]);
 
     // ── Cleanup on unmount ───────────────────────────────────────
 
@@ -265,6 +270,7 @@ export default function useWebRTC(roomCode) {
         isMicOn,
         isCameraOn,
         mediaError,
+        isMediaReady,
         toggleMic,
         toggleCamera,
     };
