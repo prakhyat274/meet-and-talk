@@ -82,3 +82,55 @@ export const SendIcon = () => (
         />
     </svg>
 );
+
+export const LeaveCallIcon = () => (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+        <path
+            d="M3.68 16.07l3.92-3.11a1.5 1.5 0 00.55-1.17V8.35a12.06 12.06 0 017.7 0v3.44a1.5 1.5 0 00.55 1.17l3.92 3.11a1 1 0 001.42-.13l1.14-1.44a1 1 0 00-.13-1.42C18.73 9.67 15.47 8 12 8s-6.73 1.67-10.75 5.08a1 1 0 00-.13 1.42l1.14 1.44a1 1 0 001.42.13z"
+            fill="currentColor"
+        />
+    </svg>
+);
+
+export const ScreenShareIcon = () => (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+        <rect
+            x="2"
+            y="3"
+            width="20"
+            height="14"
+            rx="2"
+            stroke="currentColor"
+            strokeWidth="1.6"
+        />
+        <path
+            d="M12 10v4M10 12l2-2 2 2M8 21h8"
+            stroke="currentColor"
+            strokeWidth="1.6"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+        />
+    </svg>
+);
+
+export const ScreenShareOffIcon = () => (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+        <rect
+            x="2"
+            y="3"
+            width="20"
+            height="14"
+            rx="2"
+            stroke="currentColor"
+            strokeWidth="1.6"
+        />
+        <path
+            d="M12 14v-4M10 12l2 2 2-2M8 21h8"
+            stroke="currentColor"
+            strokeWidth="1.6"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+        />
+    </svg>
+);
+

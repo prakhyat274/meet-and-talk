@@ -64,16 +64,21 @@ io.on("connection", (socket) => {
         socket.data.roomCode = data.roomCode;
         socket.data.username = data.username;
 
-        const users = roomsToUser.get(socket.data.roomCode) ?? [];
+        // Notify existing peers so they can initiate WebRTC connections
+        const existingUsers = roomsToUser.get(socket.data.roomCode) ?? [];
+        socket.to(socket.data.roomCode).emit("user-joined", {
+            socketId: socket.id,
+            username: socket.data.username,
+        });
 
-        users.push({
+        existingUsers.push({
             socketId: socket.id,
             username: socket.data.username,
             isMicOn: false,
             isCameraOn: false,
         });
 
-        roomsToUser.set(socket.data.roomCode, users);
+        roomsToUser.set(socket.data.roomCode, existingUsers);
 
         socket.join(socket.data.roomCode);
 
@@ -88,12 +93,16 @@ io.on("connection", (socket) => {
     });
 
     socket.on("leave-room", () => {
+        const roomCode = socket.data.roomCode;
         removeUser(socket);
-        socket.leave(socket.data.roomCode);
+        socket.leave(roomCode);
 
-        io.to(socket.data.roomCode).emit(
+        // Notify peers to tear down WebRTC connections
+        io.to(roomCode).emit("user-left", { socketId: socket.id });
+
+        io.to(roomCode).emit(
             "update-participants",
-            roomsToUser.get(socket.data.roomCode) ?? [],
+            roomsToUser.get(roomCode) ?? [],
         );
 
         socket.data.roomCode = undefined;
@@ -107,9 +116,11 @@ io.on("connection", (socket) => {
         });
     });
 
-    socket.on("toggle-mic", () => {
-        roomsToUser.get(socket.data.roomCode).map((user) => {
-            if (user.socketId == socket.id) user.isMicOn = !user.isMicOn;
+    socket.on("toggle-mic", (data) => {
+        const users = roomsToUser.get(socket.data.roomCode);
+        if (!users) return;
+        users.forEach((user) => {
+            if (user.socketId === socket.id) user.isMicOn = data?.isMicOn ?? !user.isMicOn;
         });
         io.to(socket.data.roomCode).emit(
             "update-participants",
@@ -117,23 +128,54 @@ io.on("connection", (socket) => {
         );
     });
 
-    socket.on("toggle-camera", () => {
-        roomsToUser.get(socket.data.roomCode).map((user) => {
-            if (user.socketId == socket.id) user.isCameraOn = !user.isCameraOn;
+    socket.on("toggle-camera", (data) => {
+        const users = roomsToUser.get(socket.data.roomCode);
+        if (!users) return;
+        users.forEach((user) => {
+            if (user.socketId === socket.id) user.isCameraOn = data?.isCameraOn ?? !user.isCameraOn;
         });
         io.to(socket.data.roomCode).emit(
             "update-participants",
             roomsToUser.get(socket.data.roomCode),
         );
     });
+
+    // ── WebRTC Signaling ──────────────────────────────────────────
+
+    socket.on("webrtc-offer", ({ targetSocketId, offer }) => {
+        io.to(targetSocketId).emit("webrtc-offer", {
+            senderSocketId: socket.id,
+            offer,
+        });
+    });
+
+    socket.on("webrtc-answer", ({ targetSocketId, answer }) => {
+        io.to(targetSocketId).emit("webrtc-answer", {
+            senderSocketId: socket.id,
+            answer,
+        });
+    });
+
+    socket.on("ice-candidate", ({ targetSocketId, candidate }) => {
+        io.to(targetSocketId).emit("ice-candidate", {
+            senderSocketId: socket.id,
+            candidate,
+        });
+    });
+
+    // ── Disconnect ────────────────────────────────────────────────
 
     socket.on("disconnect", () => {
         if (!roomsToUser.has(socket.data.roomCode)) return;
+        const roomCode = socket.data.roomCode;
         removeUser(socket);
 
-        io.to(socket.data.roomCode).emit(
+        // Notify peers to tear down WebRTC connections
+        io.to(roomCode).emit("user-left", { socketId: socket.id });
+
+        io.to(roomCode).emit(
             "update-participants",
-            roomsToUser.get(socket.data.roomCode) ?? [],
+            roomsToUser.get(roomCode) ?? [],
         );
     });
 });

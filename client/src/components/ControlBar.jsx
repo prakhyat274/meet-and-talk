@@ -1,6 +1,33 @@
-import { MicIcon, MicOffIcon, CameraIcon, CameraOffIcon } from "./icons";
+import {
+    MicIcon,
+    MicOffIcon,
+    CameraIcon,
+    CameraOffIcon,
+    LeaveCallIcon,
+    ScreenShareIcon,
+    ScreenShareOffIcon,
+} from "./icons";
 
-export default function ControlBar({ isMicOn, onToggleMic, isCameraOn, onToggleCamera }) {
+export default function ControlBar({
+    isMicOn,
+    onToggleMic,
+    isCameraOn,
+    onToggleCamera,
+    isScreenSharing,
+    onToggleScreenShare,
+    onLeaveCall,
+}) {
+    const btnBase = {
+        width: "42px",
+        height: "42px",
+        borderRadius: "10px",
+        border: "none",
+        cursor: "pointer",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+    };
+
     return (
         <div
             style={{
@@ -19,16 +46,9 @@ export default function ControlBar({ isMicOn, onToggleMic, isCameraOn, onToggleC
                 className="control-btn"
                 onClick={onToggleMic}
                 style={{
-                    width: "42px",
-                    height: "42px",
-                    borderRadius: "10px",
-                    border: "none",
+                    ...btnBase,
                     background: isMicOn ? "transparent" : "#e5484d",
                     color: isMicOn ? "#d4d4d8" : "#fff",
-                    cursor: "pointer",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
                 }}
                 title={isMicOn ? "Mute mic" : "Unmute mic"}>
                 {isMicOn ? <MicIcon /> : <MicOffIcon />}
@@ -38,20 +58,50 @@ export default function ControlBar({ isMicOn, onToggleMic, isCameraOn, onToggleC
                 className="control-btn"
                 onClick={onToggleCamera}
                 style={{
-                    width: "42px",
-                    height: "42px",
-                    borderRadius: "10px",
-                    border: "none",
+                    ...btnBase,
                     background: isCameraOn ? "transparent" : "#e5484d",
                     color: isCameraOn ? "#d4d4d8" : "#fff",
-                    cursor: "pointer",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
                 }}
                 title={isCameraOn ? "Turn off camera" : "Turn on camera"}>
                 {isCameraOn ? <CameraIcon /> : <CameraOffIcon />}
             </button>
+
+            <button
+                className="control-btn"
+                onClick={onToggleScreenShare}
+                style={{
+                    ...btnBase,
+                    background: isScreenSharing ? "rgba(52, 211, 153, 0.15)" : "transparent",
+                    color: isScreenSharing ? "#34d399" : "#d4d4d8",
+                    border: isScreenSharing ? "1px solid rgba(52, 211, 153, 0.3)" : "none",
+                }}
+                title={isScreenSharing ? "Stop sharing" : "Share screen"}>
+                {isScreenSharing ? <ScreenShareOffIcon /> : <ScreenShareIcon />}
+            </button>
+
+            {/* Separator */}
+            <div
+                style={{
+                    width: "1px",
+                    background: "#2a2a2e",
+                    margin: "4px 2px",
+                }}
+            />
+
+            <button
+                className="control-btn"
+                onClick={onLeaveCall}
+                style={{
+                    ...btnBase,
+                    width: "56px",
+                    background: "#e5484d",
+                    color: "#fff",
+                    borderRadius: "10px",
+                }}
+                title="Leave call">
+                <LeaveCallIcon />
+            </button>
         </div>
     );
 }
+

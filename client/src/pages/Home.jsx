@@ -7,6 +7,7 @@ function Home() {
     const [roomCode, setRoomCode] = useState("");
     const [username, setUsername] = useState(localStorage.getItem("username") ?? "");
     const [isUsernameEmpty, setIsUsernameEmpty] = useState(false);
+    const [roomCodeError, setRoomCodeError] = useState("");
     const navigate = useNavigate();
 
     const handleStartMeet = async () => {
@@ -28,24 +29,34 @@ function Home() {
             setIsUsernameEmpty(true);
             return;
         }
+        if (!code.trim()) {
+            setRoomCodeError("Please enter a room code");
+            return;
+        }
         localStorage.setItem("username", username.trim());
 
-        const response = await fetch(`${import.meta.env.VITE_API_URL}/joinRoom`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-                roomCode: code,
-            }),
-        });
+        try {
+            const response = await fetch(`${import.meta.env.VITE_API_URL}/joinRoom`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    roomCode: code,
+                }),
+            });
 
-        const data = await response.json();
-        const success = data.success;
+            const data = await response.json();
+            const success = data.success;
 
-        if (success) {
-            navigate(`/room/${code}`);
-        } else console.log("Invalid Room Code");
+            if (success) {
+                navigate(`/room/${code}`);
+            } else {
+                setRoomCodeError("Invalid room code — no active meeting found");
+            }
+        } catch {
+            setRoomCodeError("Could not connect to server");
+        }
     };
 
     return (
@@ -151,7 +162,10 @@ function Home() {
                     <input
                         type="text"
                         value={roomCode}
-                        onChange={(e) => setRoomCode(e.target.value)}
+                        onChange={(e) => {
+                            setRoomCode(e.target.value);
+                            if (roomCodeError) setRoomCodeError("");
+                        }}
                         placeholder="Enter room code"
                         onKeyDown={(e) => e.key === "Enter" && handleJoinMeet(roomCode)}
                         style={{
@@ -159,7 +173,9 @@ function Home() {
                             minWidth: 0,
                             padding: "12px 14px",
                             borderRadius: "10px",
-                            border: "1px solid #2a2a2e",
+                            border: roomCodeError
+                                ? "1px solid #f87171"
+                                : "1px solid #2a2a2e",
                             background: "#111114",
                             color: "#e4e4e7",
                             fontSize: "14px",
@@ -183,9 +199,21 @@ function Home() {
                         Join
                     </button>
                 </div>
+
+                {roomCodeError && (
+                    <p
+                        style={{
+                            color: "#f87171",
+                            fontSize: "12.5px",
+                            margin: "8px 0 0",
+                        }}>
+                        {roomCodeError}
+                    </p>
+                )}
             </div>
         </div>
     );
 }
 
 export default Home;
+

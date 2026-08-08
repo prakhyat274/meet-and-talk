@@ -1,6 +1,11 @@
 import ParticipantTile from "./ParticipantTile";
 
-export default function ParticipantsGrid({ participants }) {
+export default function ParticipantsGrid({
+    participants,
+    localStream,
+    remoteStreams,
+    currentSocketId,
+}) {
     return (
         <div
             style={{
@@ -13,9 +18,21 @@ export default function ParticipantsGrid({ participants }) {
                 overflow: "hidden",
                 paddingBottom: "64px",
             }}>
-            {participants.map((p) => (
-                <ParticipantTile key={p.socketId} username={p.username} />
-            ))}
+            {participants.map((p) => {
+                const isLocal = p.socketId === currentSocketId;
+                const stream = isLocal ? localStream : remoteStreams.get(p.socketId) || null;
+
+                return (
+                    <ParticipantTile
+                        key={p.socketId}
+                        username={p.username}
+                        stream={stream}
+                        isLocal={isLocal}
+                        isMicOn={p.isMicOn}
+                    />
+                );
+            })}
         </div>
     );
 }
+

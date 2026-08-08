@@ -1,24 +1,32 @@
 import { useState } from "react";
 import { useParams } from "react-router-dom";
+import socket from "../socket";
 import Notification from "../components/Notification";
 import RoomHeader from "../components/RoomHeader";
 import ParticipantsGrid from "../components/ParticipantsGrid";
 import ControlBar from "../components/ControlBar";
 import ChatPanel from "../components/ChatPanel";
 import useRoomSocket from "../hooks/useRoomSocket";
+import useWebRTC from "../hooks/useWebRTC";
 
 export default function Room() {
     const { roomCode } = useParams();
-    const username = localStorage.getItem("username") ?? "Anonymus";
+    const username = localStorage.getItem("username") ?? "Anonymous";
 
-    const { chat, notifications, participantsList, sendMessage, toggleMic, toggleCamera } =
+    const { chat, notifications, participantsList, sendMessage } =
         useRoomSocket(roomCode, username);
 
-    const [isChatOpen, setIsChatOpen] = useState(false);
-    const [isMicOn, setIsMicOn] = useState(false);
-    const [isCameraOn, setIsCameraOn] = useState(false);
+    const {
+        localStream,
+        remoteStreams,
+        isMicOn,
+        isCameraOn,
+        mediaError,
+        toggleMic,
+        toggleCamera,
+    } = useWebRTC(roomCode);
 
-    console.log(participantsList);
+    const [isChatOpen, setIsChatOpen] = useState(false);
 
     return (
         <div
@@ -48,19 +56,34 @@ export default function Room() {
                     onToggleChat={() => setIsChatOpen((prev) => !prev)}
                 />
 
-                <ParticipantsGrid participants={participantsList} />
+                {mediaError && (
+                    <div
+                        style={{
+                            padding: "10px 16px",
+                            marginBottom: "12px",
+                            background: "rgba(229, 72, 77, 0.15)",
+                            border: "1px solid rgba(229, 72, 77, 0.3)",
+                            borderRadius: "8px",
+                            color: "#f87171",
+                            fontSize: "13px",
+                            flexShrink: 0,
+                        }}>
+                        ⚠ Camera/microphone access issue: {mediaError}
+                    </div>
+                )}
+
+                <ParticipantsGrid
+                    participants={participantsList}
+                    localStream={localStream}
+                    remoteStreams={remoteStreams}
+                    currentSocketId={socket.id}
+                />
 
                 <ControlBar
                     isMicOn={isMicOn}
-                    onToggleMic={() => {
-                        setIsMicOn((prev) => !prev);
-                        toggleMic();
-                    }}
+                    onToggleMic={toggleMic}
                     isCameraOn={isCameraOn}
-                    onToggleCamera={() => {
-                        setIsCameraOn((prev) => !prev);
-                        toggleCamera();
-                    }}
+                    onToggleCamera={toggleCamera}
                 />
             </div>
 
@@ -72,3 +95,4 @@ export default function Room() {
         </div>
     );
 }
+
