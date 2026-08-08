@@ -5,12 +5,24 @@ import cors from "cors";
 
 const app = express();
 const httpServer = createServer(app);
+
+const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:5173";
+const PORT = process.env.PORT || 5000;
+
 const io = new Server(httpServer, {
     cors: {
-        origin: "http://localhost:5173",
+        origin: FRONTEND_URL,
         methods: ["GET", "POST", "PATCH", "PUT", "DELETE"],
     },
 });
+
+app.use(
+    cors({
+        origin: FRONTEND_URL,
+    })
+);
+
+app.use(express.json());
 
 const roomsToUser = new Map();
 
@@ -18,41 +30,54 @@ const generateUniqueRoomCode = () => {
     const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 
     let code = "";
+
     for (let l = 1; l <= 6; l++) {
-        code += characters[Math.floor(Math.random() * characters.length)];
+        code += characters[
+            Math.floor(Math.random() * characters.length)
+        ];
     }
 
-    if (roomsToUser.has(code)) return generateUniqueRoomCode();
+    if (roomsToUser.has(code)) {
+        return generateUniqueRoomCode();
+    }
 
     return code;
 };
 
 function removeUser(socket) {
-    const users = roomsToUser
-        .get(socket.data.roomCode)
-        .filter((user) => user.socketId !== socket.id);
+    const roomCode = socket.data.roomCode;
 
-    if (users.length === 0) roomsToUser.delete(socket.data.roomCode);
-    else roomsToUser.set(socket.data.roomCode, users);
+    if (!roomCode) return;
 
-    socket.to(socket.data.roomCode).emit("notify-room", {
-        roomCode: socket.data.roomCode,
+    const users = roomsToUser.get(roomCode);
+
+    if (!users) return;
+
+    const remainingUsers = users.filter(
+        (user) => user.socketId !== socket.id
+    );
+
+    if (remainingUsers.length === 0) {
+        roomsToUser.delete(roomCode);
+    } else {
+        roomsToUser.set(roomCode, remainingUsers);
+    }
+
+    socket.to(roomCode).emit("notify-room", {
+        roomCode,
         username: socket.data.username,
         text: "has left the meet",
     });
 }
 
-app.use(cors());
-app.use(express.json());
-
 app.get("/roomCode", (req, res) => {
     const roomCode = generateUniqueRoomCode();
+
     res.json({ roomCode });
 });
 
 app.post("/joinRoom", (req, res) => {
-    const data = req.body;
-    const roomCode = data.roomCode;
+    const { roomCode } = req.body;
 
     res.json({
         success: roomsToUser.has(roomCode),
@@ -64,12 +89,16 @@ io.on("connection", (socket) => {
         socket.data.roomCode = data.roomCode;
         socket.data.username = data.username;
 
-        // Notify existing peers so they can initiate WebRTC connections
-        const existingUsers = roomsToUser.get(socket.data.roomCode) ?? [];
-        socket.to(socket.data.roomCode).emit("user-joined", {
-            socketId: socket.id,
-            username: socket.data.username,
-        });
+        const existingUsers =
+            roomsToUser.get(socket.data.roomCode) ?? [];
+
+        // Notify existing peers
+        socket
+            .to(socket.data.roomCode)
+            .emit("user-joined", {
+                socketId: socket.id,
+                username: socket.data.username,
+            });
 
         existingUsers.push({
             socketId: socket.id,
@@ -78,31 +107,42 @@ io.on("connection", (socket) => {
             isCameraOn: false,
         });
 
-        roomsToUser.set(socket.data.roomCode, existingUsers);
+        roomsToUser.set(
+            socket.data.roomCode,
+            existingUsers
+        );
 
         socket.join(socket.data.roomCode);
 
         socket
             .to(socket.data.roomCode)
-            .emit("notify-room", { ...data, text: "has joined the meet" });
+            .emit("notify-room", {
+                ...data,
+                text: "has joined the meet",
+            });
 
         io.to(socket.data.roomCode).emit(
             "update-participants",
-            roomsToUser.get(socket.data.roomCode) ?? [],
+            roomsToUser.get(socket.data.roomCode) ?? []
         );
     });
 
     socket.on("leave-room", () => {
         const roomCode = socket.data.roomCode;
+
+        if (!roomCode) return;
+
         removeUser(socket);
+
         socket.leave(roomCode);
 
-        // Notify peers to tear down WebRTC connections
-        io.to(roomCode).emit("user-left", { socketId: socket.id });
+        io.to(roomCode).emit("user-left", {
+            socketId: socket.id,
+        });
 
         io.to(roomCode).emit(
             "update-participants",
-            roomsToUser.get(roomCode) ?? [],
+            roomsToUser.get(roomCode) ?? []
         );
 
         socket.data.roomCode = undefined;
@@ -118,68 +158,101 @@ io.on("connection", (socket) => {
 
     socket.on("toggle-mic", (data) => {
         const users = roomsToUser.get(socket.data.roomCode);
+
         if (!users) return;
+
         users.forEach((user) => {
-            if (user.socketId === socket.id) user.isMicOn = data?.isMicOn ?? !user.isMicOn;
+            if (user.socketId === socket.id) {
+                user.isMicOn =
+                    data?.isMicOn ?? !user.isMicOn;
+            }
         });
+
         io.to(socket.data.roomCode).emit(
             "update-participants",
-            roomsToUser.get(socket.data.roomCode),
+            users
         );
     });
 
     socket.on("toggle-camera", (data) => {
         const users = roomsToUser.get(socket.data.roomCode);
+
         if (!users) return;
+
         users.forEach((user) => {
-            if (user.socketId === socket.id) user.isCameraOn = data?.isCameraOn ?? !user.isCameraOn;
+            if (user.socketId === socket.id) {
+                user.isCameraOn =
+                    data?.isCameraOn ?? !user.isCameraOn;
+            }
         });
+
         io.to(socket.data.roomCode).emit(
             "update-participants",
-            roomsToUser.get(socket.data.roomCode),
+            users
         );
     });
 
-    // ── WebRTC Signaling ──────────────────────────────────────────
+    // WebRTC Signaling
 
-    socket.on("webrtc-offer", ({ targetSocketId, offer }) => {
-        io.to(targetSocketId).emit("webrtc-offer", {
-            senderSocketId: socket.id,
-            offer,
-        });
-    });
+    socket.on(
+        "webrtc-offer",
+        ({ targetSocketId, offer }) => {
+            io.to(targetSocketId).emit(
+                "webrtc-offer",
+                {
+                    senderSocketId: socket.id,
+                    offer,
+                }
+            );
+        }
+    );
 
-    socket.on("webrtc-answer", ({ targetSocketId, answer }) => {
-        io.to(targetSocketId).emit("webrtc-answer", {
-            senderSocketId: socket.id,
-            answer,
-        });
-    });
+    socket.on(
+        "webrtc-answer",
+        ({ targetSocketId, answer }) => {
+            io.to(targetSocketId).emit(
+                "webrtc-answer",
+                {
+                    senderSocketId: socket.id,
+                    answer,
+                }
+            );
+        }
+    );
 
-    socket.on("ice-candidate", ({ targetSocketId, candidate }) => {
-        io.to(targetSocketId).emit("ice-candidate", {
-            senderSocketId: socket.id,
-            candidate,
-        });
-    });
+    socket.on(
+        "ice-candidate",
+        ({ targetSocketId, candidate }) => {
+            io.to(targetSocketId).emit(
+                "ice-candidate",
+                {
+                    senderSocketId: socket.id,
+                    candidate,
+                }
+            );
+        }
+    );
 
-    // ── Disconnect ────────────────────────────────────────────────
+    // Disconnect
 
     socket.on("disconnect", () => {
-        if (!roomsToUser.has(socket.data.roomCode)) return;
         const roomCode = socket.data.roomCode;
+
+        if (!roomCode) return;
+
         removeUser(socket);
 
-        // Notify peers to tear down WebRTC connections
-        io.to(roomCode).emit("user-left", { socketId: socket.id });
+        io.to(roomCode).emit("user-left", {
+            socketId: socket.id,
+        });
 
         io.to(roomCode).emit(
             "update-participants",
-            roomsToUser.get(roomCode) ?? [],
+            roomsToUser.get(roomCode) ?? []
         );
     });
 });
 
-httpServer.listen(5000, () => {
-    console.log("Server Running At Port 5000");
+httpServer.listen(PORT, () => {
+    console.log(`Server Running At Port ${PORT}`);
 });
